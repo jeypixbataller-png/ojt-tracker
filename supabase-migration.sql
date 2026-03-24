@@ -33,13 +33,17 @@ CREATE TABLE IF NOT EXISTS public.goals (
 ALTER TABLE public.goals ENABLE ROW LEVEL SECURITY;
 
 -- Goals RLS policies
-CREATE POLICY IF NOT EXISTS "Users manage own goals"
+DROP POLICY IF EXISTS "Users manage own goals" ON public.goals;
+CREATE POLICY "Users manage own goals"
   ON public.goals FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
 -- Enable realtime for goals
-ALTER PUBLICATION supabase_realtime ADD TABLE public.goals;
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.goals;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- ── Task Comments table ──
 CREATE TABLE IF NOT EXISTS public.task_comments (
@@ -52,7 +56,8 @@ CREATE TABLE IF NOT EXISTS public.task_comments (
 
 ALTER TABLE public.task_comments ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Users manage own task comments"
+DROP POLICY IF EXISTS "Users manage own task comments" ON public.task_comments;
+CREATE POLICY "Users manage own task comments"
   ON public.task_comments FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
@@ -72,7 +77,8 @@ CREATE TABLE IF NOT EXISTS public.supervisor_feedback (
 
 ALTER TABLE public.supervisor_feedback ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Admins manage supervisor feedback"
+DROP POLICY IF EXISTS "Admins manage supervisor feedback" ON public.supervisor_feedback;
+CREATE POLICY "Admins manage supervisor feedback"
   ON public.supervisor_feedback FOR ALL
   USING (public.get_my_role() IN ('admin', 'supervisor'))
   WITH CHECK (public.get_my_role() IN ('admin', 'supervisor'));

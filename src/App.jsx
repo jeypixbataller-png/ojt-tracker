@@ -37,6 +37,13 @@ export default function App() {
 
   const progress = Math.min(100, (totalHours / (profile?.required_hours || 500)) * 100)
 
+  const handleTimerComplete = useCallback(async (hours) => {
+    const today = new Date().toISOString().slice(0, 10)
+    const r = await addLog({ date: today, time_in: '', time_out: '', break_minutes: 0, description: 'Timer session', tasks: [], mood: 3, hours_worked: hours })
+    if (r?.error) showToast(r.error.message || 'Failed to log timer', 'error')
+    else showToast(`Logged ${hours.toFixed(2)}h from timer`)
+  }, [addLog])
+
   function showToast(msg, type = 'success') {
     setToast({ msg, type })
     setTimeout(() => setToast(null), 3000)
@@ -151,13 +158,6 @@ export default function App() {
         return <Dashboard profile={profile} logs={logs} totalHours={totalHours} tasks={tasks} setPage={setPage} />
     }
   }
-
-  const handleTimerComplete = useCallback(async (hours) => {
-    const today = new Date().toISOString().slice(0, 10)
-    const r = await addLog({ date: today, time_in: '', time_out: '', break_minutes: 0, description: 'Timer session', tasks: [], mood: 3, hours_worked: hours })
-    if (r?.error) showToast(r.error.message || 'Failed to log timer', 'error')
-    else showToast(`Logged ${hours.toFixed(2)}h from timer`)
-  }, [addLog])
 
   return (
     <div className="layout">
