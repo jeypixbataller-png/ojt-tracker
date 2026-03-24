@@ -123,19 +123,10 @@ export default function AdminPanel() {
         ))}
       </div>
 
-      {/* Mobile: user select + back button */}
-      {selected && (
-        <div className="mobile-only">
-          <button className="btn btn-ghost btn-sm" onClick={() => setSelected(null)} style={{ marginBottom: 8, fontSize: 13 }}>
-            ← Back to user list
-          </button>
-        </div>
-      )}
-
       <div className="admin-grid" style={{ display: 'grid', gap: 14 }}>
         {/* User list */}
-        <div className="admin-list card" style={{
-          overflow: 'hidden', display: selected ? undefined : 'flex', flexDirection: 'column', maxHeight: '72vh',
+        <div className={`admin-list card${selected ? ' admin-hide-mobile' : ''}`} style={{
+          overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '72vh',
         }}>
           <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', background: 'var(--surface2)', display: 'flex', alignItems: 'center', gap: 7 }}>
             <Users size={14} color="var(--purple)" />
@@ -169,7 +160,7 @@ export default function AdminPanel() {
         </div>
 
         {/* Detail */}
-        <div className="admin-detail card" style={{ overflow: 'hidden', maxHeight: '72vh', display: 'flex', flexDirection: 'column' }}>
+        <div className={`admin-detail card${!selected ? ' admin-hide-mobile' : ''}`} style={{ overflow: 'hidden', maxHeight: '72vh', display: 'flex', flexDirection: 'column' }}>
           {!selected ? (
             <div className="empty" style={{ flex: 1 }}>
               <div className="empty-icon"><Users size={22} /></div>
@@ -178,6 +169,12 @@ export default function AdminPanel() {
             </div>
           ) : (
             <>
+              {/* Mobile back button */}
+              <div className="admin-back-mobile" style={{ display: 'none' }}>
+                <button className="btn btn-ghost btn-sm" onClick={() => setSelected(null)} style={{ fontSize: 13, margin: '10px 14px 0' }}>
+                  ← Back to user list
+                </button>
+              </div>
               <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, background: 'var(--surface2)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <div style={{ width: 46, height: 46, borderRadius: 13, background: 'var(--purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 18, color: '#fff', flexShrink: 0 }}>
