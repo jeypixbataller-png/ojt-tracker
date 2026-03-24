@@ -33,7 +33,11 @@ export default function NotificationBell({ announcements }) {
   function toggleOpen() {
     if (!open && btnRef.current) {
       const rect = btnRef.current.getBoundingClientRect()
-      setPos({ top: rect.bottom + 8, right: window.innerWidth - rect.right })
+      const onLeft = rect.left < window.innerWidth / 2
+      setPos({
+        top: rect.bottom + 8,
+        ...(onLeft ? { left: rect.left } : { right: window.innerWidth - rect.right }),
+      })
     }
     setOpen(o => !o)
   }
@@ -48,7 +52,7 @@ export default function NotificationBell({ announcements }) {
         position: 'fixed', zIndex: 9999,
         ...(window.innerWidth <= 768
           ? { top: 64, left: 12, right: 12, maxHeight: 'calc(100vh - 140px)' }
-          : { top: pos.top, right: Math.max(12, pos.right), width: 370, maxHeight: 480 }),
+          : { top: pos.top, width: 370, maxHeight: 480, ...(pos.left != null ? { left: pos.left } : { right: Math.max(12, pos.right) }) }),
         overflowY: 'auto',
         background: 'var(--surface)', borderRadius: 16,
         border: '1px solid var(--glass-border)',
