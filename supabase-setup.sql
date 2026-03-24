@@ -160,6 +160,12 @@ create policy "ann_admin"
   on public.announcements for all
   using (public.get_my_role() = 'admin');
 
+-- ── Enable Realtime for announcements ──
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.announcements;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
 -- ================================================================
 -- AUTO-CREATE PROFILE ON SIGNUP
 -- ================================================================

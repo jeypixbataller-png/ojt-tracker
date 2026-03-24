@@ -164,11 +164,18 @@ export function useAnnouncements() {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'announcements' }, async payload => {
         const { data } = await supabase.from('announcements').select('*').eq('id', payload.new.id).single()
         if (!data) return
-        setItems(p => [data, ...p])
+        setItems(p => {
+          if (p.some(a => a.id === data.id)) return p
+          return [data, ...p]
+        })
         if (!seenRef.current.has(data.id)) {
           seenRef.current.add(data.id)
           setPopupAnn(data)
         }
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'announcements' }, async payload => {
+        const { data } = await supabase.from('announcements').select('*').eq('id', payload.new.id).single()
+        if (data) setItems(p => p.map(a => a.id === data.id ? data : a))
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'announcements' }, payload => {
         setItems(p => p.filter(a => a.id !== payload.old?.id))

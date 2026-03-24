@@ -114,7 +114,7 @@ export default function AdminPanel() {
       )}
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(120px,1fr))', gap: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
         {[['Users', users.length, 'var(--purple)'], ['Active', activeCount, 'var(--success)'], ['Total Hours', fmtH(totalHours), 'var(--primary)'], ['Avg / User', users.length ? fmtH(totalHours / users.length) : '—', 'var(--warning)']].map(([l, v, c]) => (
           <div key={l} className="card" style={{ padding: '14px 16px', textAlign: 'center' }}>
             <div style={{ fontWeight: 700, fontSize: 20, letterSpacing: '-.03em', color: c }}>{v}</div>
@@ -123,9 +123,20 @@ export default function AdminPanel() {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'clamp(220px,28%,280px) 1fr', gap: 14 }}>
+      {/* Mobile: user select + back button */}
+      {selected && (
+        <div className="mobile-only">
+          <button className="btn btn-ghost btn-sm" onClick={() => setSelected(null)} style={{ marginBottom: 8, fontSize: 13 }}>
+            ← Back to user list
+          </button>
+        </div>
+      )}
+
+      <div className="admin-grid" style={{ display: 'grid', gap: 14 }}>
         {/* User list */}
-        <div className="card" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '72vh' }}>
+        <div className="admin-list card" style={{
+          overflow: 'hidden', display: selected ? undefined : 'flex', flexDirection: 'column', maxHeight: '72vh',
+        }}>
           <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', background: 'var(--surface2)', display: 'flex', alignItems: 'center', gap: 7 }}>
             <Users size={14} color="var(--purple)" />
             <span style={{ fontWeight: 600, fontSize: 13 }}>Users ({users.length})</span>
@@ -158,7 +169,7 @@ export default function AdminPanel() {
         </div>
 
         {/* Detail */}
-        <div className="card" style={{ overflow: 'hidden', maxHeight: '72vh', display: 'flex', flexDirection: 'column' }}>
+        <div className="admin-detail card" style={{ overflow: 'hidden', maxHeight: '72vh', display: 'flex', flexDirection: 'column' }}>
           {!selected ? (
             <div className="empty" style={{ flex: 1 }}>
               <div className="empty-icon"><Users size={22} /></div>

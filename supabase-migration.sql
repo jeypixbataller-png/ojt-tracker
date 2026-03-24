@@ -45,6 +45,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
+-- Enable realtime for announcements
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.announcements;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
 -- ── Task Comments table ──
 CREATE TABLE IF NOT EXISTS public.task_comments (
   id         uuid DEFAULT gen_random_uuid() PRIMARY KEY,
