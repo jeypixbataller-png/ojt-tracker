@@ -33,6 +33,7 @@ export default function LogsPage({ logs, addLog, updateLog, deleteLog, profile, 
 
   async function save() {
     if (!form.date) { setError('Date is required'); return }
+    if (form.date > todayStr()) { setError('Cannot log hours for a future date'); return }
     setSaving(true); setError('')
     const { error } = editId ? await updateLog(editId, form) : await addLog(form)
     setSaving(false)
@@ -64,6 +65,7 @@ export default function LogsPage({ logs, addLog, updateLog, deleteLog, profile, 
       for (let i = 1; i < lines.length; i++) {
         const vals = lines[i].split(',').map(v => v.trim().replace(/"/g, ''))
         if (!vals[dateIdx]) continue
+        if (vals[dateIdx] > todayStr()) continue
         await addLog({
           date: vals[dateIdx],
           time_in: vals[timeInIdx] || '',
@@ -131,7 +133,7 @@ export default function LogsPage({ logs, addLog, updateLog, deleteLog, profile, 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
               <div className="field" style={{ gridColumn: '1/-1' }}>
                 <label>Date</label>
-                <input type="date" className="inp" value={form.date} onChange={set('date')} />
+                <input type="date" className="inp" value={form.date} onChange={set('date')} max={todayStr()} />
               </div>
               <div className="field"><label>Time In</label><input type="time" className="inp" value={form.time_in} onChange={set('time_in')} /></div>
               <div className="field"><label>Time Out</label><input type="time" className="inp" value={form.time_out} onChange={set('time_out')} /></div>
