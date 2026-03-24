@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { LayoutDashboard, Clock, CheckSquare, Settings, LogOut, Shield, Menu, X, Megaphone, StickyNote, Moon, Sun, Calendar, BarChart3, Search, Award, Target, FileText } from 'lucide-react'
+import { LayoutDashboard, Clock, CheckSquare, Settings, LogOut, Shield, Menu, X, Megaphone, StickyNote, Moon, Sun, Calendar, BarChart3, Search, Award } from 'lucide-react'
 import NotificationBell from './NotificationBell'
 
 const NAV = [
@@ -10,8 +10,6 @@ const NAV = [
   { id: 'reports',       label: 'Reports',      icon: BarChart3 },
   { id: 'announcements', label: 'Announcements', icon: Megaphone },
   { id: 'notes',         label: 'Notes',        icon: StickyNote },
-  { id: 'goals',         label: 'Goals',        icon: Target },
-  { id: 'documents',     label: 'Documents',    icon: FileText },
   { id: 'certificate',   label: 'Certificate',  icon: Award },
   { id: 'settings',      label: 'Settings',     icon: Settings },
 ]

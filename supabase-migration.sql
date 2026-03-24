@@ -16,35 +16,6 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_column THEN NULL;
 END $$;
 
--- ── Goals table (for future goals feature) ──
-CREATE TABLE IF NOT EXISTS public.goals (
-  id          uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id     uuid REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-  title       text NOT NULL,
-  target      numeric(6,2) DEFAULT 0,
-  current     numeric(6,2) DEFAULT 0,
-  unit        text DEFAULT 'hours',
-  deadline    date,
-  completed   boolean DEFAULT false,
-  created_at  timestamptz DEFAULT now()
-);
-
--- Enable RLS on goals
-ALTER TABLE public.goals ENABLE ROW LEVEL SECURITY;
-
--- Goals RLS policies
-DROP POLICY IF EXISTS "Users manage own goals" ON public.goals;
-CREATE POLICY "Users manage own goals"
-  ON public.goals FOR ALL
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
--- Enable realtime for goals
-DO $$ BEGIN
-  ALTER PUBLICATION supabase_realtime ADD TABLE public.goals;
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
-
 -- Enable realtime for announcements
 DO $$ BEGIN
   ALTER PUBLICATION supabase_realtime ADD TABLE public.announcements;
@@ -67,11 +38,6 @@ CREATE POLICY "Users manage own task comments"
   ON public.task_comments FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
-
--- ── Documents storage bucket (create via Supabase Dashboard → Storage) ──
--- Note: Run this in the SQL editor:
--- INSERT INTO storage.buckets (id, name, public) VALUES ('documents', 'documents', true)
--- ON CONFLICT (id) DO NOTHING;
 
 -- ── Supervisor Feedback table ──
 CREATE TABLE IF NOT EXISTS public.supervisor_feedback (
@@ -98,7 +64,6 @@ ALTER TABLE public.profiles ADD CONSTRAINT profiles_role_check
 CREATE INDEX IF NOT EXISTS idx_logs_user_date ON public.logs(user_id, date DESC);
 CREATE INDEX IF NOT EXISTS idx_tasks_user_status ON public.tasks(user_id, status);
 CREATE INDEX IF NOT EXISTS idx_notes_user ON public.notes(user_id);
-CREATE INDEX IF NOT EXISTS idx_goals_user ON public.goals(user_id);
 CREATE INDEX IF NOT EXISTS idx_task_comments_task ON public.task_comments(task_id);
 CREATE INDEX IF NOT EXISTS idx_supervisor_feedback_user ON public.supervisor_feedback(user_id);
 

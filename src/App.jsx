@@ -18,9 +18,7 @@ import AnnouncementsPage from './pages/AnnouncementsPage'
 import CalendarView      from './pages/CalendarView'
 import ReportsPage       from './pages/ReportsPage'
 import CertificatePage   from './pages/CertificatePage'
-import DocumentsPage     from './pages/DocumentsPage'
-import GoalsPage         from './pages/GoalsPage'
-import { useGoals }      from './hooks/useGoals'
+
 
 export default function App() {
   const { user, profile, loading, isAdmin, signIn, signUp, signOut, updateProfile, resetPassword } = useAuth()
@@ -33,7 +31,6 @@ export default function App() {
   const { notes, addNote, updateNote, deleteNote, loading: notesLoading }                   = useNotes(user?.id)
   const { announcements, addAnnouncement, deleteAnnouncement, loading: annLoading,
           popupAnn, dismissPopup }                                                            = useAnnouncements()
-  const { goals, addGoal, updateGoal, deleteGoal, loading: goalsLoading }                     = useGoals(user?.id)
 
   const progress = Math.min(100, (totalHours / (profile?.required_hours || 500)) * 100)
 
@@ -143,17 +140,6 @@ export default function App() {
         return <ReportsPage logs={logs} tasks={tasks} profile={profile} />
       case 'certificate':
         return <CertificatePage profile={profile} totalHours={totalHours} />
-      case 'documents':
-        return <DocumentsPage userId={user?.id} />
-      case 'goals':
-        return (
-          <GoalsPage
-            goals={goals} loading={goalsLoading}
-            addGoal={g => wrap(() => addGoal(g), 'Goal created')}
-            updateGoal={(id, c) => wrap(() => updateGoal(id, c))}
-            deleteGoal={id => wrap(() => deleteGoal(id), 'Goal removed')}
-          />
-        )
       default:
         return <Dashboard profile={profile} logs={logs} totalHours={totalHours} tasks={tasks} setPage={setPage} />
     }
