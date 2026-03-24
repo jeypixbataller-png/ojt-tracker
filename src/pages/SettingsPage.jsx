@@ -1,10 +1,8 @@
 import { useState } from 'react'
-import { Save, Download, Check, User, Building, Calendar, Globe } from 'lucide-react'
-import { toCSV, fmtH } from '../utils/helpers'
-import { useI18n } from '../utils/i18n'
+import { Save, Download, Check, User, Building, Calendar } from 'lucide-react'
+import { toExcel, fmtH } from '../utils/helpers'
 
 export default function SettingsPage({ profile, updateProfile, logs }) {
-  const { lang, setLang, t, LANGS } = useI18n()
   const [form, setForm] = useState({
     full_name:       profile?.full_name       || '',
     school:          profile?.school          || '',
@@ -81,29 +79,14 @@ export default function SettingsPage({ profile, updateProfile, logs }) {
 
         <Section title="Export Data" icon={<Download size={15} />}>
           <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.6 }}>
-            Export all your time logs as a CSV file for school submission or personal records.
+            Export all your time logs as an Excel file for school submission or personal records.
           </div>
           <div style={{ background: 'var(--surface2)', borderRadius: 10, padding: '10px 13px', fontSize: 13, color: 'var(--text2)', border: '1px solid var(--border)' }}>
             {logs.length} entries · {fmtH(total)} total logged
           </div>
-          <button className="btn btn-ghost" style={{ width: '100%', justifyContent: 'center' }} onClick={() => toCSV(logs, form.full_name || 'ojt')}>
-            <Download size={14} /> Download CSV
+          <button className="btn btn-ghost" style={{ width: '100%', justifyContent: 'center' }} onClick={() => toExcel(logs, form.full_name || 'ojt', profile)}>
+            <Download size={14} /> Download Excel
           </button>
-        </Section>
-
-        <Section title={t('language')} icon={<Globe size={15} />}>
-          <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.6 }}>
-            Choose your preferred language for the interface.
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {LANGS.map(l => (
-              <button key={l.code} className={`btn ${lang === l.code ? 'btn-primary' : 'btn-ghost'}`}
-                style={{ width: '100%', justifyContent: 'center', fontSize: 13 }}
-                onClick={() => setLang(l.code)}>
-                {lang === l.code && <Check size={13} />} {l.label}
-              </button>
-            ))}
-          </div>
         </Section>
       </div>
 

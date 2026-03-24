@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, PieChart, Pie } from 'recharts'
 import { Download, Calendar, TrendingUp, Clock, Filter } from 'lucide-react'
 import { format, parseISO, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, isWithinInterval } from 'date-fns'
-import { fmtH, moodColor, moodL, toCSV, calcHours } from '../utils/helpers'
+import { fmtH, moodColor, moodL, toExcel, calcHours } from '../utils/helpers'
 
 const PERIODS = [
   { id: '7d', label: 'Last 7 Days' },
@@ -59,13 +59,8 @@ export default function ReportsPage({ logs, tasks, profile }) {
           <p className="page-sub">Analytics and insights for your internship</p>
         </div>
         <div className="page-actions">
-          <button className="btn btn-ghost" onClick={() => {
-            const blob = new Blob([toCSV(filtered, profile?.full_name || 'User')], { type: 'text/csv' })
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement('a'); a.href = url; a.download = `ojt-report-${format(new Date(), 'yyyy-MM-dd')}.csv`; a.click()
-            URL.revokeObjectURL(url)
-          }}>
-            <Download size={14} /> Export CSV
+          <button className="btn btn-ghost" onClick={() => toExcel(filtered, profile?.full_name || 'User', profile)}>
+            <Download size={14} /> Export Excel
           </button>
         </div>
       </div>

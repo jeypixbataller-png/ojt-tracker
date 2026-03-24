@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react'
-import { Plus, Trash2, Edit3, Download, Search, X, Check, Clock, Upload } from 'lucide-react'
+import { useState } from 'react'
+import { Plus, Trash2, Edit3, Download, Search, X, Check, Clock } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
-import { fmtH, moodL, moodColor, toCSV, calcHours, todayStr } from '../utils/helpers'
+import { fmtH, moodL, moodColor, toExcel, calcHours, todayStr } from '../utils/helpers'
 
 export default function LogsPage({ logs, addLog, updateLog, deleteLog, profile, loading }) {
   const [showForm,  setShowForm]  = useState(false)
@@ -11,8 +11,6 @@ export default function LogsPage({ logs, addLog, updateLog, deleteLog, profile, 
   const [saving,    setSaving]    = useState(false)
   const [error,     setError]     = useState('')
   const [form,      setForm]      = useState(blank())
-  const [importing, setImporting] = useState(false)
-  const fileRef = useRef(null)
 
   function blank() {
     return { date: todayStr(), time_in: '08:00', time_out: '17:00', break_minutes: 60, description: '', mood: 3, tasks: '' }
@@ -43,49 +41,6 @@ export default function LogsPage({ logs, addLog, updateLog, deleteLog, profile, 
 
   async function del(id) { await deleteLog(id); setConfirm(null) }
 
-  async function handleCSVImport(e) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setImporting(true)
-    try {
-      const text = await file.text()
-      const lines = text.split('\n').filter(l => l.trim())
-      if (lines.length < 2) { setError('CSV file is empty'); setImporting(false); return }
-      const headers = lines[0].toLowerCase().split(',').map(h => h.trim().replace(/"/g, ''))
-      const dateIdx = headers.findIndex(h => h === 'date')
-      const timeInIdx = headers.findIndex(h => h.includes('time_in') || h.includes('time in'))
-      const timeOutIdx = headers.findIndex(h => h.includes('time_out') || h.includes('time out'))
-      const breakIdx = headers.findIndex(h => h.includes('break'))
-      const descIdx = headers.findIndex(h => h.includes('description') || h.includes('desc'))
-      const moodIdx = headers.findIndex(h => h.includes('mood'))
-
-      if (dateIdx === -1) { setError('CSV must have a "date" column'); setImporting(false); return }
-
-      let imported = 0
-      for (let i = 1; i < lines.length; i++) {
-        const vals = lines[i].split(',').map(v => v.trim().replace(/"/g, ''))
-        if (!vals[dateIdx]) continue
-        if (vals[dateIdx] > todayStr()) continue
-        await addLog({
-          date: vals[dateIdx],
-          time_in: vals[timeInIdx] || '',
-          time_out: vals[timeOutIdx] || '',
-          break_minutes: vals[breakIdx] ? Number(vals[breakIdx]) : 0,
-          description: vals[descIdx] || '',
-          mood: vals[moodIdx] ? Number(vals[moodIdx]) : 3,
-          tasks: ''
-        })
-        imported++
-      }
-      setError('')
-      alert(`Successfully imported ${imported} log entries`)
-    } catch (err) {
-      setError('Failed to parse CSV file')
-    }
-    setImporting(false)
-    if (fileRef.current) fileRef.current.value = ''
-  }
-
   return (
     <div className="page">
       <div className="page-header">
@@ -94,12 +49,8 @@ export default function LogsPage({ logs, addLog, updateLog, deleteLog, profile, 
           <p className="page-sub">Record and manage your daily OJT hours</p>
         </div>
         <div className="page-actions">
-          <input type="file" ref={fileRef} accept=".csv" style={{ display: 'none' }} onChange={handleCSVImport} />
-          <button className="btn btn-ghost" onClick={() => fileRef.current?.click()} disabled={importing}>
-            <Upload size={14} /> {importing ? 'Importing...' : 'Import CSV'}
-          </button>
-          <button className="btn btn-ghost" onClick={() => toCSV(logs, profile?.full_name || 'ojt')}>
-            <Download size={14} /> Export CSV
+          <button className="btn btn-ghost" onClick={() => toExcel(logs, profile?.full_name || 'ojt', profile)}>
+            <Download size={14} /> Export Excel
           </button>
           <button className="btn btn-primary" onClick={openAdd}><Plus size={15} /> Log Hours</button>
         </div>

@@ -1,4 +1,5 @@
 import { format, parseISO, subDays, startOfWeek, endOfWeek, isThisWeek } from 'date-fns'
+import * as XLSX from 'xlsx'
 
 export const todayStr = () => format(new Date(), 'yyyy-MM-dd')
 
@@ -85,4 +86,77 @@ export function toCSV(logs, name = 'ojt') {
     href: URL.createObjectURL(blob),
     download: `${name}-logs-${format(new Date(), 'yyyy-MM-dd')}.csv`,
   }).click()
+}
+
+export function toExcel(logs, name = 'ojt', profile = {}) {
+  const wb = XLSX.utils.book_new()
+
+  // Header info rows
+  const headerRows = [
+    ['OJT Time Logs Report'],
+    [],
+    ['Student Name:', profile?.full_name || name, '', 'Company:', profile?.company_name || ''],
+    ['School:', profile?.school || '', '', 'Department:', profile?.department || ''],
+    ['Supervisor:', profile?.supervisor_name || '', '', 'Date Generated:', format(new Date(), 'MMM d, yyyy')],
+    [],
+  ]
+
+  // Column headers
+  const colHeaders = ['No.', 'Date', 'Day', 'Time In', 'Time Out', 'Break (min)', 'Hours Worked', 'Description', 'Tasks', 'Mood']
+
+  // Data rows
+  const dataRows = logs.map((l, i) => {
+    let dayName = ''
+    try { dayName = format(parseISO(l.date), 'EEEE') } catch { dayName = '' }
+    let dateStr = ''
+    try { dateStr = format(parseISO(l.date), 'MMM d, yyyy') } catch { dateStr = l.date || '' }
+    return [
+      i + 1,
+      dateStr,
+      dayName,
+      l.time_in || '',
+      l.time_out || '',
+      l.break_minutes || 0,
+      Number(l.hours_worked || 0),
+      l.description || '',
+      (l.tasks || []).join(', '),
+      moodL(l.mood || 3),
+    ]
+  })
+
+  // Summary rows
+  const totalHours = logs.reduce((s, l) => s + Number(l.hours_worked || 0), 0)
+  const avgHours = logs.length ? totalHours / logs.length : 0
+  const summaryRows = [
+    [],
+    ['', '', '', '', '', 'Total Hours:', totalHours, '', '', ''],
+    ['', '', '', '', '', 'Average/Day:', Math.round(avgHours * 100) / 100, '', '', ''],
+    ['', '', '', '', '', 'Total Entries:', logs.length, '', '', ''],
+  ]
+
+  // Combine all rows
+  const allRows = [...headerRows, colHeaders, ...dataRows, ...summaryRows]
+  const ws = XLSX.utils.aoa_to_sheet(allRows)
+
+  // Column widths
+  ws['!cols'] = [
+    { wch: 5 },   // No.
+    { wch: 14 },  // Date
+    { wch: 11 },  // Day
+    { wch: 9 },   // Time In
+    { wch: 9 },   // Time Out
+    { wch: 11 },  // Break
+    { wch: 13 },  // Hours Worked
+    { wch: 35 },  // Description
+    { wch: 25 },  // Tasks
+    { wch: 8 },   // Mood
+  ]
+
+  // Merge title row
+  ws['!merges'] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 9 } },
+  ]
+
+  XLSX.utils.book_append_sheet(wb, ws, 'OJT Time Logs')
+  XLSX.writeFile(wb, `${name}-logs-${format(new Date(), 'yyyy-MM-dd')}.xlsx`)
 }

@@ -1,12 +1,12 @@
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { useAuth } from './hooks/useAuth'
 import { useLogs, useTasks, useNotes, useAnnouncements } from './hooks/useData'
 import AuthPage          from './pages/AuthPage'
+import LandingPage       from './pages/LandingPage'
 import Sidebar           from './components/Sidebar'
 import Toast             from './components/Toast'
 import AnnouncementPopup from './components/AnnouncementPopup'
 import GlobalSearch      from './components/GlobalSearch'
-import LiveTimer         from './components/LiveTimer'
 import NotificationBell  from './components/NotificationBell'
 import Dashboard         from './pages/Dashboard'
 import LogsPage          from './pages/LogsPage'
@@ -25,6 +25,7 @@ export default function App() {
   const [page,  setPage]  = useState('dashboard')
   const [toast, setToast] = useState(null)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [showLanding, setShowLanding] = useState(true)
 
   const { logs, addLog, updateLog, deleteLog, totalHours, loading: logsLoading }             = useLogs(user?.id)
   const { tasks, addTask, updateTask, deleteTask, loading: tasksLoading }                     = useTasks(user?.id)
@@ -33,13 +34,6 @@ export default function App() {
           popupAnn, dismissPopup }                                                            = useAnnouncements()
 
   const progress = Math.min(100, (totalHours / (profile?.required_hours || 500)) * 100)
-
-  const handleTimerComplete = useCallback(async (hours) => {
-    const today = new Date().toISOString().slice(0, 10)
-    const r = await addLog({ date: today, time_in: '', time_out: '', break_minutes: 0, description: 'Timer session', tasks: [], mood: 3, hours_worked: hours })
-    if (r?.error) showToast(r.error.message || 'Failed to log timer', 'error')
-    else showToast(`Logged ${hours.toFixed(2)}h from timer`)
-  }, [addLog])
 
   function showToast(msg, type = 'success') {
     setToast({ msg, type })
@@ -62,8 +56,9 @@ export default function App() {
     </div>
   )
 
-  // ── Auth ──
-  if (!user) return <AuthPage onSignIn={signIn} onSignUp={signUp} onResetPassword={resetPassword} />
+  // ── Landing / Auth ──
+  if (!user && showLanding) return <LandingPage onGetStarted={() => setShowLanding(false)} />
+  if (!user) return <AuthPage onSignIn={signIn} onSignUp={signUp} onResetPassword={resetPassword} onBackToLanding={() => setShowLanding(true)} />
 
   // ── Deactivated ──
   if (profile?.is_active === false) return (
@@ -156,11 +151,6 @@ export default function App() {
         tasks={tasks}
       />
       <main className="main">
-        {page === 'dashboard' && (
-          <div style={{ padding: 'clamp(20px,4vw,32px)', paddingBottom: 0, maxWidth: 1200 }}>
-            <LiveTimer onTimerComplete={handleTimerComplete} />
-          </div>
-        )}
         {renderPage()}
       </main>
       {toast && <Toast msg={toast.msg} type={toast.type} />}
