@@ -201,21 +201,24 @@ textarea { resize: vertical; }
 
 /* ── Modal ── */
 .modal-overlay {
-  position: fixed; inset: 0; z-index: 600;
+  position: fixed; left: 0; top: 0; width: 100vw; height: 100dvh; z-index: 600;
   background: rgba(0,0,0,.45);
   backdrop-filter: blur(8px) saturate(180%);
   -webkit-backdrop-filter: blur(8px) saturate(180%);
   display: flex; align-items: center; justify-content: center;
   padding: 16px; animation: fadeIn .2s ease; overflow-y: auto;
+  touch-action: none;
+  overscroll-behavior: contain;
 }
 .modal {
   background: var(--glass-bg); backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-radius: var(--r-xl);
-  padding: 24px; width: 100%; max-width: 500px; max-height: 92vh;
+  padding: 24px; width: 100%; max-width: 500px; max-height: 92dvh;
   overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,.15), 0 2px 8px rgba(0,0,0,.08);
   border: 1px solid var(--glass-border);
   animation: scaleIn .22s cubic-bezier(.34,1.56,.64,1); position: relative;
+  box-sizing: border-box;
 }
 
 /* ── Table ── */
